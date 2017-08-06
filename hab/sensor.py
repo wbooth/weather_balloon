@@ -16,12 +16,6 @@ class Sensor(SenseHat):
         # create logfile
         self.create_logfile()
         
-        # create photo directory
-        self.create_photo_directory()
-        
-        # create video directory
-        self.create_video_directory()
-                
         # set screen to yellow
         self.set_pixels([[255, 255, 0] for _ in range(64)])  # yellow
         # self.set_pixels([[0, 255, 0] for _ in range(64)])  # green
@@ -29,12 +23,5 @@ class Sensor(SenseHat):
     def create_logfile(self):
         header = ["temp_h","temp_p","humidity","pressure","pitch","roll","yaw", "mag_x","mag_y","mag_z", 
                   "accel_x","accel_y","accel_z", "gyro_x","gyro_y","gyro_z", "timestamp"]
-        
-        
-        
-    def create_photo_directory(self):
-        pass
 
-    def create_video_directory(self):
-        pass
 
