@@ -11,11 +11,8 @@ class Camera(PiCamera):
         self.resolution = (1024, 768)
         self.start_preview()
 
-        # camera warm up
+        # camera warm up (per manual)
         time.sleep(2)
-
-        print(self.get_file_name())
-        print(self.get_file_name(video=True))
 
     def __del__(self):
         self.close()
@@ -33,7 +30,7 @@ class Camera(PiCamera):
         return os.path.join(self.base_dir, 'hab_{time}.{file_format}'.format(time=int(time.time()), file_format=file_format))
 
     def record_picture(self):
-        self.capture(self.get_file_name())
+        self.capture(self.get_file_name(video=False))
 
     def record_video(self, record_time=60):
         self.start_recording(self.get_file_name(video=True))
@@ -43,4 +40,4 @@ class Camera(PiCamera):
     def record_session(self):
         print('record session')
         self.record_picture()
-        self.record_video(record_time=60)
+        self.record_video()

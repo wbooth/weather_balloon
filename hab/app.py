@@ -68,5 +68,6 @@ class App:
             sensor_thread = threading.Thread(target=self.interval_task, args=(self.sensor.log_data, 0,))
             self.threads.append(sensor_thread)
             sensor_thread.start()
+
         except:
             print('could not start threads')
