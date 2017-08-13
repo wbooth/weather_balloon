@@ -7,6 +7,3 @@ raspberry pi, a camera (v2), and a SenseHat
 Need a pi camera v2
 ### SenseHat
 Need a sense hat
-
-
-slenium / kibana
