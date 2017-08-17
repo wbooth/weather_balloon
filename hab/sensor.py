@@ -42,7 +42,7 @@ class Sensor(SenseHat):
         }
 
         try:
-            self.set_pixels([rgb[color.to_lower()] for _ in range(64)])
+            self.set_pixels([rgb[color.lower()] for _ in range(64)])
         except KeyError:
             print('color not recognized, add rgb conversion')
 
@@ -69,13 +69,12 @@ class Sensor(SenseHat):
         """
 
         altitude_in_feet = (1 - (self.get_pressure() / 1013.25) ** 0.190284) * 145366.45
-
         # to meters = 0.3048 * altitude_in_meters
 
         return altitude_in_feet
 
     def log_data(self):
         print('logging...')
-        for data_point in self.data_points:
-            print(data_point())
+        for name, value in self.data_points.items():
+            print(name, value())
         print('got em')

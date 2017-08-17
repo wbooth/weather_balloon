@@ -5,39 +5,35 @@ from . import utility
 
 
 class Camera(PiCamera):
-    def __init__(self, base_dir='/tmp'):
+    def __init__(self, sensor=None, base_dir='/tmp'):
         PiCamera.__init__(self)
+
+        self.senor = sensor
         self.base_dir = base_dir
+
         self.resolution = (1024, 768)
         self.start_preview()
-
-        # camera warm up (per manual)
-        time.sleep(2)
+        self.camera_warmup()
 
     def __del__(self):
         self.close()
 
-    def get_file_name(self, video=False):
-        """
-        return a file name with a time stamp 
-        :return: file name
-        """
+    @staticmethod
+    def camera_warmup():
+        time.sleep(2)
 
-        file_format = 'jpg'
-        if video:
-            file_format = 'h264'
-
-        return os.path.join(self.base_dir, 'hab_{time}.{file_format}'.format(time=int(time.time()), file_format=file_format))
+    def get_file_name(self, format):
+        return os.path.join(self.base_dir, 'hab_{time}.{format}'.format(time=int(time.time()),
+                                                                        format=format))
 
     def record_picture(self):
-        self.capture(self.get_file_name(video=False))
+        self.capture(self.get_file_name(format='jpg'))
 
     def record_video(self, record_time=60):
-        self.start_recording(self.get_file_name(video=True))
+        self.start_recording(self.get_file_name(format='h264'))
         self.wait_recording(record_time)
         self.stop_recording()
 
     def record_session(self):
-        print('record session')
         self.record_picture()
         self.record_video()

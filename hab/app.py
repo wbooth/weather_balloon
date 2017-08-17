@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import threading
 from . import sensor
@@ -37,27 +38,33 @@ class App:
         return False
 
     @staticmethod
-    def interval_task(task, interval_time=-1):
+    def interval_task(task, interval_time=-1, task_kwargs={}):
         # update pass args
         while True:
-            task()
+            task(**task_kwargs)
             if interval_time:
                 time.sleep(interval_time)
+            break
 
     def thread_monitor(self):
         print('monitoring...')
 
+    def pause_for_joystick(self):
+        # wait for input from joy stick to continue
+        while True:
+            if self.get_stick_pressed():
+                self.sensor.start()
+                break
+
     def execute(self):
         print('executing...')
 
-        # wait for input from joy stick to continue
-        # while True:
-        #     if self.get_stick_pressed():
-        #         self.sensor.start()
-        #         break
+        self.sensor.log_data()
+
+        self.pause_for_joystick()
 
         try:
-            monitor_thread = threading.Thread(target=self.interval_task, args=(self.thread_monitor, 0,))
+            monitor_thread = threading.Thread(target=self.interval_task, args=(self.thread_monitor, 5,))
             self.threads.append(monitor_thread)
             monitor_thread.start()
 
@@ -65,9 +72,9 @@ class App:
             self.threads.append(camera_thread)
             camera_thread.start()
 
-            sensor_thread = threading.Thread(target=self.interval_task, args=(self.sensor.log_data, 0,))
+            sensor_thread = threading.Thread(target=self.interval_task, args=(self.sensor.log_data, 2,))
             self.threads.append(sensor_thread)
             sensor_thread.start()
 
-        except:
-            print('could not start threads')
+        except KeyboardInterrupt:
+            sys.exit()
