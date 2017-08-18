@@ -8,7 +8,7 @@ class Camera(PiCamera):
     def __init__(self, sensor=None, base_dir='/tmp'):
         PiCamera.__init__(self)
 
-        self.senor = sensor
+        self.sensor = sensor
         self.base_dir = base_dir
 
         self.resolution = (1024, 768)
@@ -23,7 +23,7 @@ class Camera(PiCamera):
         time.sleep(2)
 
     def get_file_name(self, format):
-        return os.path.join(self.base_dir, 'hab_{time}.{format}'.format(time=int(time.time()),
+        return os.path.join(self.base_dir, 'hab_{time}.{format}'.format(time=utility.Util.get_timestamp(),
                                                                         format=format))
 
     def record_picture(self):

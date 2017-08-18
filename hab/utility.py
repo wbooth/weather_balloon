@@ -1,21 +1,23 @@
 import os
+import csv
+import time
 import logging
 
 
 class Util:
-    def __init__(self):
-        logging.basicConfig(filename='runtime.log',
-                            filemode='w',
-                            level=logging.DEBUG)
-
-    def log(self, message):
-        pass
+    
+    @staticmethod
+    def get_timestamp():
+        return int(time.time())
+    
+    @staticmethod
+    def write_csv(filename, data):
+        with open(filename, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
 
     @staticmethod
     def create_dir(directory):
-        # directory = os.path.dirname(file_path)
         if not os.path.exists(directory):
-            print('creating directory {directory}'.format(directory=directory))
+            logging.debug('creating directory {directory}'.format(directory=directory))
             os.makedirs(directory)
-            
-        return True

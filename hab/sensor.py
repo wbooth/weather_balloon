@@ -1,39 +1,34 @@
 import os
+import logging
 from sense_hat import SenseHat
 from . import utility
 
 
 class Sensor(SenseHat):
-    def __init__(self):
+    def __init__(self, base_dir):
         SenseHat.__init__(self)
+        
         self.set_screen_color('red')
-
-        self.pressure_at_start = 1000  # average millibars at sea level
+        
+        self.base_dir = base_dir
+        self.pressure_at_start = 1000  # standard millibars at sea level
+        self.create_data_file()
         
         self.data_points = {
+            'altitude': self.get_altitude,
             'temp_h': self.get_temperature_from_humidity,
             'temp_p': self.get_temperature_from_pressure,
             'humidity': self.get_humidity,
             'pressure': self.get_pressure,
-            'orientation': self.get_orientation,  # dict of x, y, z = pitch, roll, yaw
-            'mag': self.get_compass_raw,          # dict of x, y, z = pitch, roll, yaw
-            'accel': self.get_accelerometer_raw,  # dict of x, y, z = pitch, roll, yaw
-            'gyro': self.get_gyroscope_raw,       # dict of x, y, z = pitch, roll, yaw
+            'orientation_pitch': self.get_orientation_pitch,
+            'orientation_roll': self.get_orientation_roll,
+            'orientation_yaw': self.get_orientation_yaw,
         }
 
     def __del__(self):
         self.clear()
 
-    def set_screen_color(self, color=None):
-        """
-        set all pixels a single rgb color
-        :param color: [r, g, b]
-        :return:
-        """
-
-        if not color:
-            self.clear()
-            return
+    def set_screen_color(self, color):
 
         rgb = {
             'red': [255, 0, 0],
@@ -44,8 +39,15 @@ class Sensor(SenseHat):
         try:
             self.set_pixels([rgb[color.lower()] for _ in range(64)])
         except KeyError:
-            print('color not recognized, add rgb conversion')
+            logging.error('color not recognized, add rgb conversion')
 
+    def get_data_file_name(self):
+        return os.path.join(self.base_dir, 'hab_data.csv')
+    
+    def create_data_file(self):
+        utility.Util.write_csv(filename=self.get_data_file_name(),
+                               data=['timestamp', 'type', 'value'])
+        
     def ready(self):
         self.set_screen_color(color='yellow')
 
@@ -53,28 +55,23 @@ class Sensor(SenseHat):
         self.pressure_at_start = self.get_pressure()
         self.set_screen_color(color='green')
 
-    def create_logfile(self, base_dir):
-        """
-        Create log file
-        :return: 
-        """
-        
-        header = ["temp_h" ,"temp_p", "humidity", "pressure", "pitch", "roll", "yaw", "mag_x", "mag_y", "mag_z",
-                  "accel_x", "accel_y", "accel_z", "gyro_x", "gyro_y", "gyro_z", "timestamp"]
-
     def get_altitude(self):
-        """
-        convert pressure in millibars to (approx.) altitude in feet.
-        :return:
-        """
-
-        altitude_in_feet = (1 - (self.get_pressure() / 1013.25) ** 0.190284) * 145366.45
-        # to meters = 0.3048 * altitude_in_meters
-
-        return altitude_in_feet
-
+        # convert pressure in millibars to (approx.) altitude in feet.
+        # to convert to meters, 0.3048 * altitude
+        return (1 - (self.get_pressure() / 1013.25) ** 0.190284) * 145366.45
+    
+    def get_orientation_pitch(self):
+        return self.get_orientation()['pitch']
+    
+    def get_orientation_roll(self):
+        return self.get_orientation()['roll']
+    
+    def get_orientation_yaw(self):
+        return self.get_orientation()['yaw']
+    
     def log_data(self):
-        print('logging...')
-        for name, value in self.data_points.items():
-            print(name, value())
-        print('got em')
+            for data_type, get_value in self.data_points.items():
+                msg = "{name}: {value}".format(name=data_type, value=get_value())
+                logging.debug(msg)
+                utility.Util.write_csv(filename=self.get_data_file_name(),
+                                       data=[utility.Util.get_timestamp(), data_type, get_value()])
