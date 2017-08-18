@@ -5,10 +5,9 @@ from . import utility
 
 
 class Camera(PiCamera):
-    def __init__(self, sensor=None, base_dir='/tmp'):
+    def __init__(self, base_dir='/tmp'):
         PiCamera.__init__(self)
 
-        self.sensor = sensor
         self.base_dir = base_dir
 
         self.resolution = (1024, 768)
